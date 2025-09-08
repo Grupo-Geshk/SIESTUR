@@ -8,4 +8,3 @@ appsettings.Production.json
 *.sqlite
 .vscode/
 SIESTUR.http
-Dockerfile
