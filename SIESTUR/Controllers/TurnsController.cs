@@ -69,6 +69,7 @@ public class TurnsController : ControllerBase
             {
                 Number = number,
                 Status = TurnStatus.Pending, // FIXED: Use constant instead of magic string
+                Kind = dto?.Kind ?? "NORMAL", // FIXED: Set kind from request DTO (NORMAL, DISABILITY, SPECIAL)
                 CreatedAt = _dateTime.UtcNow // FIXED: Use injected IDateTimeProvider for testability
             };
 
@@ -82,10 +83,12 @@ public class TurnsController : ControllerBase
                 Id = turn.Id,
                 Number = turn.Number,
                 Status = turn.Status,
+                Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
                 WindowNumber = null,
                 CreatedAt = turn.CreatedAt,
                 CalledAt = turn.CalledAt,
                 ServedAt = turn.ServedAt,
+                CompletedAt = turn.CompletedAt, // FIXED: Include CompletedAt
                 SkippedAt = turn.SkippedAt
             };
 
@@ -122,10 +125,12 @@ public class TurnsController : ControllerBase
                 Id = t.Id,
                 Number = t.Number,
                 Status = t.Status,
+                Kind = t.Kind ?? "NORMAL", // FIXED: Include Kind in response
                 WindowNumber = t.Window != null ? t.Window.Number : (int?)null,
                 CreatedAt = t.CreatedAt,
                 CalledAt = t.CalledAt,
                 ServedAt = t.ServedAt,
+                CompletedAt = t.CompletedAt, // FIXED: Include CompletedAt
                 SkippedAt = t.SkippedAt
             })
             .ToListAsync();
@@ -154,10 +159,12 @@ public class TurnsController : ControllerBase
                 Id = t.Id,
                 Number = t.Number,
                 Status = t.Status,
+                Kind = t.Kind ?? "NORMAL", // FIXED: Include Kind in response
                 WindowNumber = t.Window != null ? t.Window.Number : (int?)null,
                 CreatedAt = t.CreatedAt,
                 CalledAt = t.CalledAt,
                 ServedAt = t.ServedAt,
+                CompletedAt = t.CompletedAt, // FIXED: Include CompletedAt
                 SkippedAt = t.SkippedAt
             })
             .ToListAsync();

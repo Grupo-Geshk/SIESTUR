@@ -97,6 +97,7 @@ public class WindowsController : ControllerBase
             TurnId = turn.Id,
             TurnNumber = turn.Number,
             Status = turn.Status,
+            Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
             WindowNumber = windowNumber,
             CalledAt = turn.CalledAt
         };
@@ -129,6 +130,7 @@ public class WindowsController : ControllerBase
             TurnId = turn.Id,
             TurnNumber = turn.Number,
             Status = turn.Status,
+            Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
             WindowNumber = windowNumber,
             CalledAt = turn.CalledAt,
             ServedAt = turn.ServedAt
@@ -153,6 +155,7 @@ public class WindowsController : ControllerBase
             return BadRequest("Solo se puede completar un turno en CALLED o SERVING.");
 
         turn.Status = "DONE";
+        turn.CompletedAt = DateTime.UtcNow; // FIXED: Set CompletedAt timestamp
         await _db.SaveChangesAsync();
 
         var resp = new WindowActionResponseDto
@@ -160,9 +163,11 @@ public class WindowsController : ControllerBase
             TurnId = turn.Id,
             TurnNumber = turn.Number,
             Status = turn.Status,
+            Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
             WindowNumber = windowNumber,
             CalledAt = turn.CalledAt,
-            ServedAt = turn.ServedAt
+            ServedAt = turn.ServedAt,
+            CompletedAt = turn.CompletedAt // FIXED: Include CompletedAt
         };
 
         await _turnsHub.Clients.All.SendAsync("turns:updated", resp);
@@ -192,6 +197,7 @@ public class WindowsController : ControllerBase
             TurnId = turn.Id,
             TurnNumber = turn.Number,
             Status = turn.Status,
+            Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
             WindowNumber = windowNumber,
             CalledAt = turn.CalledAt,
             ServedAt = turn.ServedAt,
@@ -231,9 +237,14 @@ public class WindowsController : ControllerBase
         foreach (var w in windows)
         {
             if (mapWinIdToTurn.TryGetValue(w.Id, out var t))
-                winDtos.Add(new WindowNowDto { WindowNumber = w.Number, CurrentTurn = t.Number, Status = t.Status });
+                winDtos.Add(new WindowNowDto {
+                    WindowNumber = w.Number,
+                    CurrentTurn = t.Number,
+                    Status = t.Status,
+                    Kind = t.Kind ?? "NORMAL" // FIXED: Include Kind in response
+                });
             else
-                winDtos.Add(new WindowNowDto { WindowNumber = w.Number, CurrentTurn = null, Status = null });
+                winDtos.Add(new WindowNowDto { WindowNumber = w.Number, CurrentTurn = null, Status = null, Kind = null });
         }
 
         var upcomings = await _db.Turns.AsNoTracking()
