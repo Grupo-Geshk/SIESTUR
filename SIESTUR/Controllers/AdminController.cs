@@ -1,13 +1,17 @@
-﻿using System.Security.Claims;
-using BCrypt.Net;
+﻿// Controllers/AdminController.cs  (V3 alineado)
+// - Reset-day: confirmación "Estoy seguro de eliminar.", snapshot del día, reinicio de numeración (fallback 1), cierre de sesiones y notificaciones SignalR.
+// - Purge-now: cierra sesiones, elimina TODOS los turnos, reinicia numeración (fallback 1) y notifica.
+// - CRUD de Usuarios, Ventanillas y Videos tal como pediste.
+// Nota: Usa DTOs de SIESTUR.DTOs y StatsDtos ya alineados.
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Siestur.Data;
-using Siestur.DTOs.Admin;
 using Siestur.Models;
 using Siestur.Services.Hubs;
+using SIESTUR.DTOs;
 
 namespace Siestur.Controllers;
 
@@ -19,26 +23,28 @@ public class AdminController : ControllerBase
     private readonly ApplicationDbContext _db;
     private readonly IHubContext<TurnsHub> _turnsHub;
     private readonly IHubContext<WindowsHub> _windowsHub;
-    private readonly IHubContext<VideosHub> _videosHub;
 
     public AdminController(
         ApplicationDbContext db,
         IHubContext<TurnsHub> turnsHub,
-        IHubContext<WindowsHub> windowsHub,
-        IHubContext<VideosHub> videosHub)
+        IHubContext<WindowsHub> windowsHub)
     {
         _db = db;
         _turnsHub = turnsHub;
         _windowsHub = windowsHub;
-        _videosHub = videosHub;
     }
 
-    // ====== USERS ======
+    private static DateOnly UtcToday() => DateOnly.FromDateTime(DateTime.UtcNow);
+
+    // ------------------------------------------------------------------------
+    // USUARIOS
+    // ------------------------------------------------------------------------
 
     [HttpGet("users")]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> ListUsers()
     {
         var users = await _db.Users.AsNoTracking()
+            .OrderBy(u => u.CreatedAt)
             .Select(u => new UserResponseDto
             {
                 Id = u.Id,
@@ -56,34 +62,33 @@ public class AdminController : ControllerBase
     [HttpPost("users")]
     public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name) ||
-            string.IsNullOrWhiteSpace(dto.Email) ||
-            string.IsNullOrWhiteSpace(dto.Password))
-            return BadRequest("Faltan datos obligatorios.");
+        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+            return BadRequest("Email y Password son requeridos.");
 
-        var email = dto.Email.Trim().ToLower();
-        var exists = await _db.Users.AnyAsync(u => u.Email.ToLower() == email);
-        if (exists) return Conflict("Ya existe un usuario con ese correo.");
+        var email = dto.Email.Trim().ToLowerInvariant();
+        if (await _db.Users.AnyAsync(x => x.Email == email))
+            return Conflict("Ya existe un usuario con ese email.");
 
         var user = new User
         {
-            Name = dto.Name.Trim(),
+            Id = Guid.NewGuid(),
+            Name = dto.Name?.Trim(),
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             Role = string.IsNullOrWhiteSpace(dto.Role) ? "Colaborador" : dto.Role.Trim(),
             Active = true,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             CreatedAt = DateTime.UtcNow
         };
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetUsers), new { id = user.Id }, new UserResponseDto
+        return CreatedAtAction(nameof(ListUsers), new { id = user.Id }, new UserResponseDto
         {
             Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            Role = user.Role,
+            Name = user.Name!,
+            Email = user.Email!,
+            Role = user.Role!,
             Active = user.Active,
             CreatedAt = user.CreatedAt
         });
@@ -92,29 +97,37 @@ public class AdminController : ControllerBase
     [HttpPut("users/{id:guid}")]
     public async Task<ActionResult<UserResponseDto>> UpdateUser([FromRoute] Guid id, [FromBody] UpdateUserDto dto)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
         if (user is null) return NotFound();
 
-        if (!string.IsNullOrWhiteSpace(dto.Name)) user.Name = dto.Name.Trim();
         if (!string.IsNullOrWhiteSpace(dto.Email))
         {
-            var email = dto.Email.Trim().ToLower();
-            var exists = await _db.Users.AnyAsync(u => u.Email.ToLower() == email && u.Id != id);
-            if (exists) return Conflict("Ya existe otro usuario con ese correo.");
+            var email = dto.Email.Trim().ToLowerInvariant();
+            var exists = await _db.Users.AnyAsync(x => x.Email == email && x.Id != id);
+            if (exists) return Conflict("Ya existe otro usuario con ese email.");
             user.Email = email;
         }
-        if (!string.IsNullOrWhiteSpace(dto.Role)) user.Role = dto.Role.Trim();
-        if (dto.Active.HasValue) user.Active = dto.Active.Value;
-        if (!string.IsNullOrWhiteSpace(dto.NewPassword)) user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+
+        if (!string.IsNullOrWhiteSpace(dto.Name))
+            user.Name = dto.Name.Trim();
+
+        if (!string.IsNullOrWhiteSpace(dto.Role))
+            user.Role = dto.Role.Trim();
+
+        if (dto.Active.HasValue)
+            user.Active = dto.Active.Value;
+
+        if (!string.IsNullOrWhiteSpace(dto.NewPassword))
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
 
         await _db.SaveChangesAsync();
 
         return Ok(new UserResponseDto
         {
             Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            Role = user.Role,
+            Name = user.Name!,
+            Email = user.Email!,
+            Role = user.Role!,
             Active = user.Active,
             CreatedAt = user.CreatedAt
         });
@@ -123,86 +136,117 @@ public class AdminController : ControllerBase
     [HttpDelete("users/{id:guid}")]
     public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
         if (user is null) return NotFound();
+
         _db.Users.Remove(user);
         await _db.SaveChangesAsync();
         return NoContent();
     }
 
-    // ====== WINDOWS ======
+    // ------------------------------------------------------------------------
+    // VENTANILLAS
+    // ------------------------------------------------------------------------
 
     [HttpGet("windows")]
-    public async Task<ActionResult<IEnumerable<WindowResponseDto>>> GetWindows()
+    public async Task<ActionResult<IEnumerable<WindowResponseDto>>> ListWindows()
     {
         var list = await _db.Windows.AsNoTracking()
             .OrderBy(w => w.Number)
-            .Select(w => new WindowResponseDto { Id = w.Id, Number = w.Number, Active = w.Active })
+            .Select(w => new WindowResponseDto
+            {
+                Id = w.Id,
+                Number = w.Number,
+                Active = w.Active
+            })
             .ToListAsync();
+
         return Ok(list);
     }
 
     [HttpPost("windows")]
     public async Task<ActionResult<WindowResponseDto>> CreateWindow([FromBody] CreateWindowDto dto)
     {
-        if (dto.Number <= 0) return BadRequest("El número de ventanilla debe ser > 0.");
+        if (dto.Number <= 0) return BadRequest("Número inválido.");
+        if (await _db.Windows.AnyAsync(x => x.Number == dto.Number))
+            return Conflict("Ya existe una ventanilla con ese número.");
 
-        var exists = await _db.Windows.AnyAsync(w => w.Number == dto.Number);
-        if (exists) return Conflict("Ya existe una ventanilla con ese número.");
-
-        var win = new Window { Number = dto.Number, Active = true };
-        _db.Windows.Add(win);
+        var w = new Window
+        {
+            Id = Guid.NewGuid(),
+            Number = dto.Number,
+            Active = true
+        };
+        _db.Windows.Add(w);
         await _db.SaveChangesAsync();
 
-        // Notificar cambios a paneles
         await _windowsHub.Clients.All.SendAsync("windows:updated");
 
-        return CreatedAtAction(nameof(GetWindows), new { id = win.Id },
-            new WindowResponseDto { Id = win.Id, Number = win.Number, Active = win.Active });
+        return CreatedAtAction(nameof(ListWindows), new { id = w.Id }, new WindowResponseDto
+        {
+            Id = w.Id,
+            Number = w.Number,
+            Active = w.Active
+        });
     }
 
     [HttpPut("windows/{id:guid}")]
     public async Task<ActionResult<WindowResponseDto>> UpdateWindow([FromRoute] Guid id, [FromBody] UpdateWindowDto dto)
     {
-        var win = await _db.Windows.FirstOrDefaultAsync(w => w.Id == id);
-        if (win is null) return NotFound();
+        var w = await _db.Windows.FirstOrDefaultAsync(x => x.Id == id);
+        if (w is null) return NotFound();
 
         if (dto.Number.HasValue)
         {
-            if (dto.Number <= 0) return BadRequest("El número de ventanilla debe ser > 0.");
-            var exists = await _db.Windows.AnyAsync(w => w.Number == dto.Number && w.Id != id);
+            if (dto.Number.Value <= 0) return BadRequest("Número inválido.");
+            var exists = await _db.Windows.AnyAsync(x => x.Number == dto.Number && x.Id != id);
             if (exists) return Conflict("Ya existe otra ventanilla con ese número.");
-            win.Number = dto.Number.Value;
+            w.Number = dto.Number.Value;
         }
-        if (dto.Active.HasValue) win.Active = dto.Active.Value;
+
+        if (dto.Active.HasValue)
+            w.Active = dto.Active.Value;
 
         await _db.SaveChangesAsync();
         await _windowsHub.Clients.All.SendAsync("windows:updated");
 
-        return Ok(new WindowResponseDto { Id = win.Id, Number = win.Number, Active = win.Active });
+        return Ok(new WindowResponseDto
+        {
+            Id = w.Id,
+            Number = w.Number,
+            Active = w.Active
+        });
     }
 
     [HttpDelete("windows/{id:guid}")]
     public async Task<IActionResult> DeleteWindow([FromRoute] Guid id)
     {
-        var win = await _db.Windows.FirstOrDefaultAsync(w => w.Id == id);
-        if (win is null) return NotFound();
+        var w = await _db.Windows.FirstOrDefaultAsync(x => x.Id == id);
+        if (w is null) return NotFound();
 
-        _db.Windows.Remove(win);
+        _db.Windows.Remove(w);
         await _db.SaveChangesAsync();
         await _windowsHub.Clients.All.SendAsync("windows:updated");
         return NoContent();
     }
 
-    // ====== VIDEOS (cola de TV) ======
+    // ------------------------------------------------------------------------
+    // VIDEOS
+    // ------------------------------------------------------------------------
 
     [HttpGet("videos")]
-    public async Task<ActionResult<IEnumerable<VideoResponseDto>>> GetVideos()
+    public async Task<ActionResult<IEnumerable<VideoResponseDto>>> ListVideos()
     {
         var vids = await _db.Videos.AsNoTracking()
             .OrderBy(v => v.Position)
-            .Select(v => new VideoResponseDto { Id = v.Id, Url = v.Url, Position = v.Position })
+            .Select(v => new VideoResponseDto
+            {
+                Id = v.Id,
+                Url = v.Url,
+                Position = v.Position
+            })
             .ToListAsync();
+
         return Ok(vids);
     }
 
@@ -214,25 +258,29 @@ public class AdminController : ControllerBase
         int position;
         if (dto.Position.HasValue)
         {
-            position = Math.Max(0, dto.Position.Value);
-            // desplazar elementos que tengan posición >= position
-            var toShift = await _db.Videos.Where(v => v.Position >= position).ToListAsync();
-            foreach (var v in toShift) v.Position++;
+            position = dto.Position.Value;
         }
         else
         {
-            position = (await _db.Videos.MaxAsync(v => (int?)v.Position)) ?? -1;
-            position += 1;
+            var max = await _db.Videos.MaxAsync(v => (int?)v.Position) ?? 0;
+            position = max + 1;
         }
 
-        var video = new Video { Url = dto.Url.Trim(), Position = position };
-        _db.Videos.Add(video);
+        var vid = new Video
+        {
+            Id = Guid.NewGuid(),
+            Url = dto.Url.Trim(),
+            Position = position
+        };
+        _db.Videos.Add(vid);
         await _db.SaveChangesAsync();
 
-        await _videosHub.Clients.All.SendAsync("videos:updated");
-
-        return CreatedAtAction(nameof(GetVideos), new { id = video.Id },
-            new VideoResponseDto { Id = video.Id, Url = video.Url, Position = video.Position });
+        return CreatedAtAction(nameof(ListVideos), new { id = vid.Id }, new VideoResponseDto
+        {
+            Id = vid.Id,
+            Url = vid.Url,
+            Position = vid.Position
+        });
     }
 
     [HttpPut("videos/{id:guid}")]
@@ -241,33 +289,20 @@ public class AdminController : ControllerBase
         var v = await _db.Videos.FirstOrDefaultAsync(x => x.Id == id);
         if (v is null) return NotFound();
 
-        if (!string.IsNullOrWhiteSpace(dto.Url)) v.Url = dto.Url.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Url))
+            v.Url = dto.Url.Trim();
 
-        if (dto.Position.HasValue && dto.Position.Value != v.Position)
-        {
-            var newPos = Math.Max(0, dto.Position.Value);
-            // reordenar: liberar antigua y colocar nueva
-            if (newPos > v.Position)
-            {
-                var toShiftDown = await _db.Videos
-                    .Where(x => x.Position > v.Position && x.Position <= newPos && x.Id != v.Id)
-                    .ToListAsync();
-                foreach (var x in toShiftDown) x.Position--;
-            }
-            else
-            {
-                var toShiftUp = await _db.Videos
-                    .Where(x => x.Position >= newPos && x.Position < v.Position && x.Id != v.Id)
-                    .ToListAsync();
-                foreach (var x in toShiftUp) x.Position++;
-            }
-            v.Position = newPos;
-        }
+        if (dto.Position.HasValue)
+            v.Position = dto.Position.Value;
 
         await _db.SaveChangesAsync();
-        await _videosHub.Clients.All.SendAsync("videos:updated");
 
-        return Ok(new VideoResponseDto { Id = v.Id, Url = v.Url, Position = v.Position });
+        return Ok(new VideoResponseDto
+        {
+            Id = v.Id,
+            Url = v.Url,
+            Position = v.Position
+        });
     }
 
     [HttpDelete("videos/{id:guid}")]
@@ -276,64 +311,160 @@ public class AdminController : ControllerBase
         var v = await _db.Videos.FirstOrDefaultAsync(x => x.Id == id);
         if (v is null) return NotFound();
 
-        var oldPos = v.Position;
         _db.Videos.Remove(v);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 
-        // compactar posiciones
-        var toShift = await _db.Videos.Where(x => x.Position > oldPos).ToListAsync();
-        foreach (var x in toShift) x.Position--;
+    // ------------------------------------------------------------------------
+    // RESET DEL DÍA (con snapshot + reinicio numeración)
+    // ------------------------------------------------------------------------
+
+    [HttpPost("reset-day")]
+    public async Task<IActionResult> ResetDay([FromBody] ResetDayRequestDto dto)
+    {
+        const string Expected = "Estoy seguro de eliminar."; // unificado con DTO
+        if (!string.Equals(dto?.Confirmation?.Trim(), Expected, StringComparison.Ordinal))
+            return BadRequest($"Debe escribir exactamente: {Expected}");
+
+        var today = UtcToday();
+
+        // 1) Cerrar sesiones abiertas
+        var openSessions = await _db.WorkerSessions.Where(ws => ws.EndedAt == null).ToListAsync();
+        foreach (var s in openSessions) s.EndedAt = DateTime.UtcNow;
+
+        // 2) Snapshot de turnos del día a TurnFacts
+        var turnsToday = await _db.Turns
+            .Include(t => t.Window)
+            .Where(t => DateOnly.FromDateTime(t.CreatedAt.ToUniversalTime()) == today)
+            .ToListAsync();
+
+        var facts = new List<TurnFact>();
+        foreach (var t in turnsToday)
+        {
+            int? s(DateTime? a, DateTime? b) =>
+                (a.HasValue && b.HasValue) ? (int?)(a.Value - b.Value).TotalSeconds : null;
+
+            var totalLead = t.CompletedAt ?? t.ServedAt ?? t.CalledAt;
+
+            facts.Add(new TurnFact
+            {
+                Id = Guid.NewGuid(),
+                ServiceDate = today,
+                Number = t.Number,
+                Kind = t.Kind ?? "NORMAL",
+                FinalStatus = (t.Status ?? "PENDING").ToUpperInvariant(),
+                WindowNumber = t.Window?.Number,
+                OperatorUserId = t.CompletedByUserId ?? t.ServedByUserId ?? t.CalledByUserId,
+                CreatedAt = t.CreatedAt,
+                CalledAt = t.CalledAt,
+                ServedAt = t.ServedAt,
+                CompletedAt = t.CompletedAt,
+                SkippedAt = t.SkippedAt,
+                WaitToCallSec = s(t.CalledAt, t.CreatedAt),
+                CallToServeSec = s(t.ServedAt, t.CalledAt),
+                ServeToCompleteSec = s(t.CompletedAt, t.ServedAt),
+                TotalLeadTimeSec = s(totalLead, t.CreatedAt)
+            });
+        }
+
+        if (facts.Count > 0)
+        {
+            await _db.TurnFacts.AddRangeAsync(facts);
+        }
+
+        // 3) OperatorDailyFacts (del día)
+        if (facts.Count > 0)
+        {
+            var byOperator = facts
+                .Where(x => x.OperatorUserId.HasValue)
+                .GroupBy(x => x.OperatorUserId!.Value)
+                .Select(g => new OperatorDailyFact
+                {
+                    Id = Guid.NewGuid(),
+                    ServiceDate = today,
+                    OperatorUserId = g.Key,
+                    ServedCount = g.Count(x => x.ServedAt.HasValue || x.FinalStatus == "DONE"),
+                    AvgServeToCompleteSec = Avg(g.Select(x => x.ServeToCompleteSec)),
+                    AvgTotalLeadTimeSec = Avg(g.Select(x => x.TotalLeadTimeSec)),
+                    WindowMin = g.Min(x => x.WindowNumber),
+                    WindowMax = g.Max(x => x.WindowNumber)
+                }).ToList();
+
+            if (byOperator.Count > 0)
+                await _db.OperatorDailyFacts.AddRangeAsync(byOperator);
+        }
+
+        // 4) Eliminar TODOS los turnos (limpieza general como solicitaste)
+        _db.Turns.RemoveRange(_db.Turns);
+
+        // 5) Reiniciar contador del día a startDefault (fallback ENV/1)
+        var settings = await _db.Settings.AsNoTracking().FirstOrDefaultAsync();
+        var startDefault = settings?.StartNumberDefault
+            ?? int.Parse(Environment.GetEnvironmentVariable("Siestur__StartNumberDefault") ?? "1");
+
+        var dc = await _db.DayCounters.FirstOrDefaultAsync(x => x.ServiceDate == today);
+        if (dc is null)
+            _db.DayCounters.Add(new DayCounter { ServiceDate = today, NextNumber = startDefault });
+        else
+            dc.NextNumber = startDefault;
 
         await _db.SaveChangesAsync();
-        await _videosHub.Clients.All.SendAsync("videos:updated");
+
+        // 6) Notificar
+        await _turnsHub.Clients.All.SendAsync("turns:reset");
+        await _windowsHub.Clients.All.SendAsync("windows:updated");
+
+        return Ok(new
+        {
+            message = "Día reiniciado. Turnos del día archivados en estadísticas y numeración reiniciada.",
+            startDefault,
+            turnsArchived = facts.Count
+        });
+    }
+
+    // ------------------------------------------------------------------------
+    // PURGA AGRESIVA (sin snapshot)
+    // ------------------------------------------------------------------------
+
+    [HttpPost("turns/purge-now")]
+    public async Task<IActionResult> PurgeNow()
+    {
+        // 1) Cerrar sesiones
+        var open = await _db.WorkerSessions.Where(ws => ws.EndedAt == null).ToListAsync();
+        foreach (var s in open) s.EndedAt = DateTime.UtcNow;
+
+        // 2) Eliminar TODOS los turnos
+        _db.Turns.RemoveRange(_db.Turns);
+
+        // 3) Reiniciar contador del día a startDefault (consistente con reset-day)
+        var today = UtcToday();
+        var settings = await _db.Settings.AsNoTracking().FirstOrDefaultAsync();
+        var startDefault = settings?.StartNumberDefault
+            ?? int.Parse(Environment.GetEnvironmentVariable("Siestur__StartNumberDefault") ?? "1");
+
+        var dc = await _db.DayCounters.FirstOrDefaultAsync(x => x.ServiceDate == today);
+        if (dc is null)
+            _db.DayCounters.Add(new DayCounter { ServiceDate = today, NextNumber = startDefault });
+        else
+            dc.NextNumber = startDefault;
+
+        await _db.SaveChangesAsync();
+
+        // 4) Notificar
+        await _turnsHub.Clients.All.SendAsync("turns:reset");
+        await _windowsHub.Clients.All.SendAsync("windows:updated");
 
         return NoContent();
     }
 
-    // ====== RESET DIARIO ======
-    // Requerimiento: iniciar en 00 y que las ventanillas no tengan asignaciones del día anterior.
-    // Además, confirmación destructiva con texto exacto.
-    // (Se recomienda también cortar WorkerSessions abiertas y reiniciar el contador del día)
-    [HttpPost("reset-day")]
-    public async Task<IActionResult> ResetDay([FromBody] ResetDayRequestDto dto)
+    // ------------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------------
+
+    private static double? Avg(IEnumerable<int?> xs)
     {
-        if (dto?.Confirmation?.Trim() != "Estoy seguro de borrar los turnos.")
-            return BadRequest("Debe escribir exactamente: Estoy seguro de borrar los turnos.");
-
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        // Reiniciar contador del día
-        var settings = await _db.Settings.AsNoTracking().FirstOrDefaultAsync();
-        var startDefault = settings?.StartNumberDefault ??
-            int.Parse(Environment.GetEnvironmentVariable("Siestur__StartNumberDefault") ?? "0");
-
-        var dc = await _db.DayCounters.FirstOrDefaultAsync(x => x.ServiceDate == today);
-        if (dc is null)
-        {
-            _db.DayCounters.Add(new DayCounter { ServiceDate = today, NextNumber = startDefault });
-        }
-        else
-        {
-            dc.NextNumber = startDefault;
-        }
-
-        // Cerrar sesiones activas
-        var openSessions = await _db.WorkerSessions.Where(ws => ws.EndedAt == null).ToListAsync();
-        foreach (var s in openSessions) s.EndedAt = DateTime.UtcNow;
-
-        // Limpiar turnos del día actual (PENDING, CALLED, SERVING) y soltar asociaciones
-        var toDelete = await _db.Turns
-            .Where(t => DateOnly.FromDateTime(t.CreatedAt) == today)
-            .ToListAsync();
-
-        _db.Turns.RemoveRange(toDelete);
-
-        await _db.SaveChangesAsync();
-
-        // Notificar a paneles (TV/ventanillas/asignador)
-        await _turnsHub.Clients.All.SendAsync("turns:reset");
-        await _windowsHub.Clients.All.SendAsync("windows:updated");
-        await _videosHub.Clients.All.SendAsync("videos:updated"); // opcional, por si cambias la cola también
-
-        return Ok(new { message = "Día reiniciado.", startDefault });
+        var vals = xs.Where(x => x.HasValue).Select(x => (double)x!.Value).ToList();
+        return vals.Count == 0 ? null : vals.Average();
     }
 }

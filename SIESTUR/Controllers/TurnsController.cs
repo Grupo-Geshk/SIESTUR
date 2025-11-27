@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Siestur.Data;
-using Siestur.DTOs.Turns;
 using Siestur.Models;
 using Siestur.Services.Hubs;
+using SIESTUR.DTOs;
 
 namespace Siestur.Controllers;
 
@@ -32,13 +32,11 @@ public class TurnsController : ControllerBase
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        // Usamos una transacción simple para evitar condiciones de carrera en NextNumber.
         await using var tx = await _db.Database.BeginTransactionAsync();
 
         var dc = await _db.DayCounters.FirstOrDefaultAsync(x => x.ServiceDate == today);
         if (dc is null)
         {
-            // start default: Settings o ENV
             var settings = await _db.Settings.AsNoTracking().FirstOrDefaultAsync();
             var startDefault = settings?.StartNumberDefault
                 ?? int.Parse(Environment.GetEnvironmentVariable("Siestur__StartNumberDefault") ?? "0");
@@ -49,7 +47,7 @@ public class TurnsController : ControllerBase
 
         if (dto?.StartOverride is int start && start > dc.NextNumber)
         {
-            dc.NextNumber = start; // “iniciar desde” si el admin no reseteó pero el asignador lo necesita
+            dc.NextNumber = start;
             await _db.SaveChangesAsync();
         }
 
@@ -57,11 +55,17 @@ public class TurnsController : ControllerBase
         dc.NextNumber = number + 1;
         await _db.SaveChangesAsync();
 
+        // Validar Kind
+        var kind = string.IsNullOrWhiteSpace(dto?.Kind) ? "NORMAL" : dto.Kind.ToUpperInvariant();
+        if (kind != "NORMAL" && kind != "DISABILITY" && kind != "SPECIAL")
+            return BadRequest("Tipo de turno inválido. Use NORMAL, DISABILITY o SPECIAL.");
+
         var turn = new Turn
         {
             Number = number,
             Status = "PENDING",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            Kind = kind
         };
 
         _db.Turns.Add(turn);
@@ -70,7 +74,6 @@ public class TurnsController : ControllerBase
 
         var dtoResp = await MapToDto(turn);
 
-        // Notificar a toda la app que hay un nuevo turno (reactivo)
         await _turnsHub.Clients.All.SendAsync("turns:created", dtoResp);
 
         return CreatedAtAction(nameof(GetRecent), new { limit = 1 }, dtoResp);
@@ -99,7 +102,9 @@ public class TurnsController : ControllerBase
                 CreatedAt = t.CreatedAt,
                 CalledAt = t.CalledAt,
                 ServedAt = t.ServedAt,
-                SkippedAt = t.SkippedAt
+                SkippedAt = t.SkippedAt,
+                CompletedAt = t.CompletedAt,   // NUEVO
+                Kind = t.Kind                  // NUEVO
             })
             .ToListAsync();
 
@@ -127,7 +132,9 @@ public class TurnsController : ControllerBase
                 CreatedAt = t.CreatedAt,
                 CalledAt = t.CalledAt,
                 ServedAt = t.ServedAt,
-                SkippedAt = t.SkippedAt
+                SkippedAt = t.SkippedAt,
+                CompletedAt = t.CompletedAt,   // NUEVO
+                Kind = t.Kind                  // NUEVO
             })
             .ToListAsync();
 
@@ -153,7 +160,9 @@ public class TurnsController : ControllerBase
             CreatedAt = t.CreatedAt,
             CalledAt = t.CalledAt,
             ServedAt = t.ServedAt,
-            SkippedAt = t.SkippedAt
+            SkippedAt = t.SkippedAt,
+            CompletedAt = t.CompletedAt, // NUEVO
+            Kind = t.Kind                // NUEVO
         };
     }
 }

@@ -12,9 +12,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<Window> Windows { get; set; }
     public DbSet<DayCounter> DayCounters { get; set; }
     public DbSet<Turn> Turns { get; set; }
+    public DbSet<TurnFact> TurnFacts { get; set; }
+    public DbSet<OperatorDailyFact> OperatorDailyFacts { get; set; }
     public DbSet<WorkerSession> WorkerSessions { get; set; }
     public DbSet<Video> Videos { get; set; }
     public DbSet<Settings> Settings { get; set; }
+
+    public DbSet<SystemState> SystemStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,5 +46,18 @@ public class ApplicationDbContext : DbContext
         // DayCounter keyed por fecha
         modelBuilder.Entity<DayCounter>()
             .HasKey(dc => dc.ServiceDate);
+        // Prioridad de cola por estado/tipo/número
+        modelBuilder.Entity<Turn>()
+            .HasIndex(t => new { t.Status, t.Kind, t.Number });
+
+        // Búsquedas rápidas por fecha en facts
+        modelBuilder.Entity<TurnFact>()
+            .HasIndex(f => f.ServiceDate);
+
+        modelBuilder.Entity<TurnFact>()
+            .HasIndex(f => new { f.ServiceDate, f.OperatorUserId });
+
+        modelBuilder.Entity<TurnFact>()
+            .HasIndex(f => new { f.ServiceDate, f.WindowNumber });
     }
 }

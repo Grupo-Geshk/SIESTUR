@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Siestur.Data;
-using Siestur.DTOs.Auth;
 using Siestur.Services;
 using BCrypt.Net;
-using Siestur.DTOs.Admin; // si reutilizas UserResponseDto, o usa AuthUserDto (ya definido)
-using Siestur.DTOs.Auth;
 using Siestur.Models;
+using SIESTUR.DTOs;
 
 namespace Siestur.Controllers;
 

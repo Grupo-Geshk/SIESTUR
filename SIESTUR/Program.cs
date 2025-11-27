@@ -1,5 +1,4 @@
 ﻿// Program.cs
-using System.Text;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Siestur.Data;
 using Siestur.Services;
 using Siestur.Services.Hubs;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +26,9 @@ builder.Services.AddControllers();
 
 // === SignalR ===
 builder.Services.AddSignalR();
+
+builder.Services.AddScoped<IDayResetService, DayResetService>();
+builder.Services.AddHostedService<DailyResetHostedService>();
 
 // === JWT ===
 builder.Services.AddScoped<ITokenService, TokenService>();
