@@ -27,8 +27,9 @@ builder.Services.AddControllers();
 // === SignalR ===
 builder.Services.AddSignalR();
 
-// === JWT ===
+// === Services ===
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 var jwtKey = Environment.GetEnvironmentVariable("Jwt__Key")
     ?? throw new InvalidOperationException("Falta Jwt__Key");
 var jwtIssuer = Environment.GetEnvironmentVariable("Jwt__Issuer")
