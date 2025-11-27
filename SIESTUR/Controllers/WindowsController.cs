@@ -34,6 +34,95 @@ public class WindowsController : ControllerBase
         _dateTime = dateTime;
     }
 
+    // ====== LISTAR VENTANILLAS CON ESTADO ======
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<object>>> GetWindows()
+    {
+        var windows = await _db.Windows.AsNoTracking()
+            .Where(w => w.Active)
+            .OrderBy(w => w.Number)
+            .ToListAsync();
+
+        // Get active sessions to determine which windows are in use
+        var activeSessions = await _db.WorkerSessions.AsNoTracking()
+            .Where(ws => ws.EndedAt == null && ws.WindowId != null)
+            .Select(ws => ws.WindowId!.Value)
+            .Distinct()
+            .ToListAsync();
+
+        var result = windows.Select(w => new
+        {
+            w.Id,
+            w.Number,
+            w.Active,
+            InUse = activeSessions.Contains(w.Id)
+        });
+
+        return Ok(result);
+    }
+
+    // ====== OBTENER MI SESIÓN ACTUAL ======
+    [HttpGet("sessions/me")]
+    public async Task<ActionResult<object>> GetMySession()
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+        var session = await _db.WorkerSessions
+            .Include(ws => ws.Window)
+            .FirstOrDefaultAsync(ws => ws.UserId == userId && ws.EndedAt == null && ws.WindowId != null);
+
+        if (session is null) return NotFound("No hay sesión activa.");
+
+        // Get current turn being handled at this window (if any)
+        var currentTurn = await _db.Turns
+            .Where(t => t.WindowId == session.WindowId && (t.Status == "CALLED" || t.Status == "SERVING"))
+            .OrderByDescending(t => t.CalledAt)
+            .Select(t => new WindowActionResponseDto
+            {
+                TurnId = t.Id,
+                TurnNumber = t.Number,
+                Status = t.Status,
+                Kind = t.Kind ?? "NORMAL",
+                WindowNumber = session.Window!.Number,
+                CalledAt = t.CalledAt,
+                ServedAt = t.ServedAt,
+                CompletedAt = t.CompletedAt,
+                SkippedAt = t.SkippedAt
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(new
+        {
+            windowNumber = session.Window!.Number,
+            currentTurn
+        });
+    }
+
+    // ====== CERRAR MI SESIÓN ======
+    [HttpDelete("sessions")]
+    public async Task<ActionResult> EndMySession()
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+        var sessions = await _db.WorkerSessions
+            .Where(ws => ws.UserId == userId && ws.EndedAt == null)
+            .ToListAsync();
+
+        if (sessions.Count == 0) return NotFound("No hay sesión activa para cerrar.");
+
+        foreach (var s in sessions)
+        {
+            s.EndedAt = DateTime.UtcNow;
+        }
+
+        await _db.SaveChangesAsync();
+        await _windowsHub.Clients.All.SendAsync("windows:updated");
+
+        return Ok(new { message = "Sesión cerrada correctamente." });
+    }
+
     // ====== INICIAR SESIÓN EN UNA VENTANILLA ======
     // Colaborador elige el número de ventanilla (creada por Admin) y abre su sesión de trabajo.
     // Requisito: el colaborador puede elegir qué número de ventanilla utilizará el día. :contentReference[oaicite:3]{index=3}
@@ -48,14 +137,17 @@ public class WindowsController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
+        // Check if window is already in use by another user
+        var existingSession = await _db.WorkerSessions
+            .FirstOrDefaultAsync(ws => ws.WindowId == win.Id && ws.EndedAt == null && ws.UserId != userId);
+        if (existingSession is not null)
+            return Conflict($"La ventanilla {dto.WindowNumber} ya está en uso por otro operador.");
+
         // Cierra cualquier sesión previa abierta del usuario
         var openMine = await _db.WorkerSessions
             .Where(ws => ws.UserId == userId && ws.EndedAt == null)
             .ToListAsync();
         foreach (var s in openMine) s.EndedAt = DateTime.UtcNow;
-
-        // (Regla simple) Permitimos sesiones concurrentes en la misma ventanilla si el otro ya cerró.
-        // Si quieres bloqueo duro por ventanilla, valida que no existan otras sesiones abiertas con ese WindowId.
 
         var session = new WorkerSession
         {
