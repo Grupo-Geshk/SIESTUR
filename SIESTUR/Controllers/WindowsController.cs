@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Siestur.Data;
-using Siestur.DTOs.Windows;
 using Siestur.Extensions;
 using Siestur.Models;
 using Siestur.Services;
 using Siestur.Services.Hubs;
+using SIESTUR.DTOs;
 
 namespace Siestur.Controllers;
 

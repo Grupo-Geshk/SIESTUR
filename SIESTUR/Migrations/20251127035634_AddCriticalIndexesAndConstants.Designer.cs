@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Siestur.Data;
@@ -11,9 +12,11 @@ using Siestur.Data;
 namespace SIESTUR.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127035634_AddCriticalIndexesAndConstants")]
+    partial class AddCriticalIndexesAndConstants
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,6 +127,7 @@ namespace SIESTUR.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Kind")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
@@ -149,13 +153,9 @@ namespace SIESTUR.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("WindowId", "Status");
+                    b.HasIndex("WindowId");
 
                     b.HasIndex("Status", "Kind", "Number");
-
-                    b.HasIndex("Status", "Number", "CreatedAt");
 
                     b.ToTable("Turns");
                 });
@@ -259,9 +259,6 @@ namespace SIESTUR.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
                     b.ToTable("Users");
                 });
 
@@ -280,8 +277,6 @@ namespace SIESTUR.Migrations
                         .HasColumnType("character varying(300)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Position");
 
                     b.ToTable("Videos");
                 });
@@ -331,9 +326,9 @@ namespace SIESTUR.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "EndedAt");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("WindowId", "EndedAt");
+                    b.HasIndex("WindowId");
 
                     b.ToTable("WorkerSessions");
                 });

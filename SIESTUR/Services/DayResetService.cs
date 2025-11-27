@@ -63,7 +63,7 @@ public class DayResetService : IDayResetService
             TotalLeadTimeSec = diff(t.CompletedAt ?? t.ServedAt ?? t.CalledAt, t.CreatedAt)
         }).ToList();
 
-        if (facts.Count > 0) _db.TurnFacts.AddRange(facts);
+        if (facts.Count() > 0) _db.TurnFacts.AddRange(facts);
 
         if (facts.Any())
         {
@@ -103,6 +103,6 @@ public class DayResetService : IDayResetService
         await _windowsHub.Clients.All.SendAsync("windows:updated");
         await _videosHub.Clients.All.SendAsync("videos:updated");
 
-        return (facts.Count, startDefault);
+        return (facts.Count(), startDefault);
     }
 }

@@ -72,9 +72,9 @@ public class AdminController : ControllerBase
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Name = dto.Name?.Trim(),
+            Name = dto.Name?.Trim() ?? string.Empty,
             Email = email,
-            Role = string.IsNullOrWhiteSpace(dto.Role) ? "Colaborador" : dto.Role.Trim(),
+            Role = string.IsNullOrWhiteSpace(dto.Role) ? UserRole.Colaborador : dto.Role.Trim(),
             Active = true,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             CreatedAt = DateTime.UtcNow
