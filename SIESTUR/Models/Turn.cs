@@ -8,7 +8,7 @@ public class Turn
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [Required] public int Number { get; set; }
-    [Required, MaxLength(10)] public string Status { get; set; } = "PENDING"; // PENDING|CALLED|SERVING|DONE|SKIPPED
+    [Required, MaxLength(10)] public string Status { get; set; } = TurnStatus.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? CalledAt { get; set; }
     public DateTime? ServedAt { get; set; }

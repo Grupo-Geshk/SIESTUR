@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Siestur.Data;
 using Siestur.DTOs.Windows;
+using Siestur.Extensions;
 using Siestur.Models;
+using Siestur.Services;
 using Siestur.Services.Hubs;
 
 namespace Siestur.Controllers;
@@ -18,15 +20,18 @@ public class WindowsController : ControllerBase
     private readonly ApplicationDbContext _db;
     private readonly IHubContext<WindowsHub> _windowsHub;
     private readonly IHubContext<TurnsHub> _turnsHub;
+    private readonly IDateTimeProvider _dateTime;
 
     public WindowsController(
         ApplicationDbContext db,
         IHubContext<WindowsHub> windowsHub,
-        IHubContext<TurnsHub> turnsHub)
+        IHubContext<TurnsHub> turnsHub,
+        IDateTimeProvider dateTime)
     {
         _db = db;
         _windowsHub = windowsHub;
         _turnsHub = turnsHub;
+        _dateTime = dateTime;
     }
 
     // ====== INICIAR SESIÓN EN UNA VENTANILLA ======

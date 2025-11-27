@@ -9,8 +9,7 @@ public class WorkerSession
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [Required, ForeignKey(nameof(User))] public Guid UserId { get; set; }
     public User User { get; set; } = default!;
-    // ASSIGNER | WINDOW
-    [Required, MaxLength(10)] public string Mode { get; set; } = "ASSIGNER";
+    [Required, MaxLength(10)] public string Mode { get; set; } = WorkerSessionMode.Assigner;
     [ForeignKey(nameof(Window))] public Guid? WindowId { get; set; }
     public Window? Window { get; set; }
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;

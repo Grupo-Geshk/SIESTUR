@@ -20,11 +20,45 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Window.Number único
+        // ===== WINDOW =====
         modelBuilder.Entity<Window>()
             .HasIndex(w => w.Number)
             .IsUnique();
 
+        // ===== TURN INDEXES =====
+        // Critical index for PENDING queue lookup with FIFO ordering
+        modelBuilder.Entity<Turn>()
+            .HasIndex(t => new { t.Status, t.Number, t.CreatedAt });
+
+        // Index for date-based filtering
+        modelBuilder.Entity<Turn>()
+            .HasIndex(t => t.CreatedAt);
+
+        // Index for window-based queries
+        modelBuilder.Entity<Turn>()
+            .HasIndex(t => new { t.WindowId, t.Status });
+
+        // ===== USER INDEXES =====
+        // Unique case-insensitive email index for login
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        // ===== WORKER SESSION INDEXES =====
+        // Index for finding active sessions by user
+        modelBuilder.Entity<WorkerSession>()
+            .HasIndex(ws => new { ws.UserId, ws.EndedAt });
+
+        // Index for finding active sessions by window
+        modelBuilder.Entity<WorkerSession>()
+            .HasIndex(ws => new { ws.WindowId, ws.EndedAt });
+
+        // ===== VIDEO INDEXES =====
+        // Index for ordering video playlist
+        modelBuilder.Entity<Video>()
+            .HasIndex(v => v.Position);
+
+        // ===== FOREIGN KEY RELATIONSHIPS =====
         // WorkerSession -> Window (no cascada; no queremos borrar sesiones si se borra la ventanilla)
         modelBuilder.Entity<WorkerSession>()
             .HasOne(ws => ws.Window)
@@ -39,6 +73,7 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(t => t.WindowId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // ===== KEYS =====
         // DayCounter keyed por fecha
         modelBuilder.Entity<DayCounter>()
             .HasKey(dc => dc.ServiceDate);
