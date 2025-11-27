@@ -3,44 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\dtos\\admindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\dtos\\admindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\dtos\\windowdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\dtos\\windowdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\dtos\\turnsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\dtos\\turnsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\dtos\\statsdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\dtos\\statsdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\dtos\\publicdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\dtos\\publicdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\controllers\\statscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\controllers\\statscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\controllers\\windowscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\controllers\\windowscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\controllers\\publicboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\controllers\\publicboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\controllers\\turnscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\controllers\\turnscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|c:\\users\\gio\\source\\repos\\siestur\\siestur\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{E5A6916F-10F3-4DAD-B1F1-D7EB22CDFC94}|SIESTUR\\SIESTUR.csproj|solutionrelative:siestur\\.env||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -63,123 +43,63 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "SIESTUR\\Controllers\\AdminController.cs",
-              "ViewState": "AgIAAMQBAAAAAAAAAAAAANYBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T04:29:31.996Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "AdminDto.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\AdminDto.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\DTOs\\AdminDto.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\AdminDto.cs",
-              "RelativeToolTip": "SIESTUR\\DTOs\\AdminDto.cs",
-              "ViewState": "AgIAAC4AAAAAAAAAAAA2wDcAAAA0AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:45:33.953Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "WindowDto.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\WindowDto.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\DTOs\\WindowDto.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\WindowDto.cs",
-              "RelativeToolTip": "SIESTUR\\DTOs\\WindowDto.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAcwCwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:45:26.184Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "TurnsDto.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\TurnsDto.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\DTOs\\TurnsDto.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\TurnsDto.cs",
-              "RelativeToolTip": "SIESTUR\\DTOs\\TurnsDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:45:15.799Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "StatsDtos.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\StatsDtos.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\DTOs\\StatsDtos.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\StatsDtos.cs",
-              "RelativeToolTip": "SIESTUR\\DTOs\\StatsDtos.cs",
-              "ViewState": "AgIAADIAAAAAAAAAAAA2wDwAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:45:04.425Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "PublicDto.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\PublicDto.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\DTOs\\PublicDto.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\DTOs\\PublicDto.cs",
-              "RelativeToolTip": "SIESTUR\\DTOs\\PublicDto.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAA2wCYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:44:51.654Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
               "Title": "StatsController.cs",
               "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\StatsController.cs",
               "RelativeDocumentMoniker": "SIESTUR\\Controllers\\StatsController.cs",
               "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\StatsController.cs",
               "RelativeToolTip": "SIESTUR\\Controllers\\StatsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAMwI0AAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:01:17.709Z"
+              "WhenOpened": "2025-11-27T03:58:32.377Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "PublicBoardController.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\PublicBoardController.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\Controllers\\PublicBoardController.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\PublicBoardController.cs",
-              "RelativeToolTip": "SIESTUR\\Controllers\\PublicBoardController.cs",
-              "ViewState": "AgIAAFQAAAAAAAAAAADwv3cAAAAmAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "TurnsController.cs",
+              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\TurnsController.cs",
+              "RelativeDocumentMoniker": "SIESTUR\\Controllers\\TurnsController.cs",
+              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\TurnsController.cs",
+              "RelativeToolTip": "SIESTUR\\Controllers\\TurnsController.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAADwv28AAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:24:40.961Z"
+              "WhenOpened": "2025-11-27T03:49:04.031Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\appsettings.json",
+              "RelativeDocumentMoniker": "SIESTUR\\appsettings.json",
+              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\appsettings.json",
+              "RelativeToolTip": "SIESTUR\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-27T03:35:26.402Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": ".env",
+              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\.env",
+              "RelativeDocumentMoniker": "SIESTUR\\.env",
+              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\.env",
+              "RelativeToolTip": "SIESTUR\\.env",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-11-27T03:35:23.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Program.cs",
               "RelativeDocumentMoniker": "SIESTUR\\Program.cs",
               "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Program.cs",
               "RelativeToolTip": "SIESTUR\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAB0AAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T03:17:55.428Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "WindowsController.cs",
-              "DocumentMoniker": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\WindowsController.cs",
-              "RelativeDocumentMoniker": "SIESTUR\\Controllers\\WindowsController.cs",
-              "ToolTip": "C:\\Users\\Gio\\source\\repos\\SIESTUR\\SIESTUR\\Controllers\\WindowsController.cs",
-              "RelativeToolTip": "SIESTUR\\Controllers\\WindowsController.cs",
-              "ViewState": "AgIAAFABAAAAAAAAAADwv1YBAABGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-29T18:23:18.543Z"
+              "WhenOpened": "2025-11-27T03:35:15.378Z"
             }
           ]
         }
