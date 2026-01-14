@@ -164,19 +164,36 @@ public class WindowsController : ControllerBase
     }
 
     // ====== TOMAR SIGUIENTE TURNO (FIFO) ======
-    // Lógica: primer Turn con Status=PENDING ordenado por Number ASC, CreatedAt ASC. :contentReference[oaicite:4]{index=4}
+    // Lógica: primer Turn con Status=PENDING ordenado por Number ASC, CreatedAt ASC.
+    // Si se especifica 'kind', filtra solo por ese tipo de turno (NORMAL, DISABILITY, SPECIAL)
     [HttpPost("{windowNumber:int}/next")]
-    public async Task<ActionResult<WindowActionResponseDto>> TakeNext([FromRoute] int windowNumber)
+    public async Task<ActionResult<WindowActionResponseDto>> TakeNext(
+        [FromRoute] int windowNumber,
+        [FromQuery] string? kind)
     {
         var win = await _db.Windows.AsNoTracking().FirstOrDefaultAsync(w => w.Number == windowNumber && w.Active);
         if (win is null) return NotFound("Ventanilla no encontrada.");
 
-        var turn = await _db.Turns
-            .Where(t => t.Status == "PENDING")
+        // Build query for pending turns
+        var query = _db.Turns.Where(t => t.Status == "PENDING");
+
+        // Filter by kind if specified (NORMAL, DISABILITY, SPECIAL)
+        if (!string.IsNullOrWhiteSpace(kind))
+        {
+            var normalizedKind = kind.Trim().ToUpperInvariant();
+            query = query.Where(t => t.Kind != null && t.Kind.ToUpper() == normalizedKind);
+        }
+
+        // Get first turn in FIFO order (lowest number first, then earliest created)
+        var turn = await query
             .OrderBy(t => t.Number).ThenBy(t => t.CreatedAt)
             .FirstOrDefaultAsync();
 
-        if (turn is null) return NotFound("No hay turnos pendientes.");
+        if (turn is null)
+        {
+            var kindMsg = !string.IsNullOrWhiteSpace(kind) ? $" de tipo {kind}" : "";
+            return NotFound($"No hay turnos pendientes{kindMsg}.");
+        }
 
         turn.Status = "CALLED";
         turn.CalledAt = DateTime.UtcNow;
@@ -189,7 +206,7 @@ public class WindowsController : ControllerBase
             TurnId = turn.Id,
             TurnNumber = turn.Number,
             Status = turn.Status,
-            Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
+            Kind = turn.Kind ?? "NORMAL",
             WindowNumber = windowNumber,
             CalledAt = turn.CalledAt
         };
@@ -277,8 +294,9 @@ public class WindowsController : ControllerBase
 
         var turn = await _db.Turns.FirstOrDefaultAsync(t => t.Id == turnId);
         if (turn is null) return NotFound("Turno no encontrado.");
-        if (turn.Status != "CALLED")
-            return BadRequest("Solo se puede omitir un turno en estado CALLED.");
+        // Allow skipping from both CALLED and SERVING states (same as Complete)
+        if (turn.Status != "CALLED" && turn.Status != "SERVING")
+            return BadRequest("Solo se puede omitir un turno en estado CALLED o SERVING.");
 
         turn.Status = "SKIPPED";
         turn.SkippedAt = DateTime.UtcNow;
@@ -289,7 +307,7 @@ public class WindowsController : ControllerBase
             TurnId = turn.Id,
             TurnNumber = turn.Number,
             Status = turn.Status,
-            Kind = turn.Kind ?? "NORMAL", // FIXED: Include Kind in response
+            Kind = turn.Kind ?? "NORMAL",
             WindowNumber = windowNumber,
             CalledAt = turn.CalledAt,
             ServedAt = turn.ServedAt,

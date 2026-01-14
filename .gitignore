@@ -8,3 +8,6 @@ appsettings.Production.json
 *.sqlite
 .vscode/
 SIESTUR.http
+.claude/
+nul
+tmpclaude-*
